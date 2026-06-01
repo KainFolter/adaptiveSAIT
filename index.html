@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#2c3e50">
+    <title>Генератор отчетов ALUTECH</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.2rem;
+        }
+        
+        .badge {
+            background: #27ae60;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.65rem;
+            margin-top: 5px;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .time-box {
+            text-align: right;
+        }
+        
+        .date {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .time {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.8rem;
+        }
+        
+        label .required {
+            color: #e74c3c;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+            background: white;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .ai-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: auto;
+            margin: 0;
+            z-index: 1;
+        }
+        
+        .ai-btn:hover {
+            background: #229954;
+        }
+        
+        .ai-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        button:hover {
+            background: #c0392b;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-group a {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn-group a:hover {
+            background: #2980b9;
+        }
+        
+        .btn-group button {
+            flex: 1;
+            margin-top: 0;
+            background: #95a5a6;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-group button:hover {
+            background: #7f8c8d;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-size: 0.7rem;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+            font-size: 0.85rem;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+            font-size: 0.85rem;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .info-text {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .preview-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            background: #e8f4f8;
+            color: #2980b9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            margin: 2px;
+        }
+        
+        /* Стиль для скрытого содержимого отчета */
+        .report-preview {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            line-height: 1.4;
+            padding: 20px;
+        }
+        
+        /* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 12px 15px;
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .logo h1 {
+                font-size: 1.1rem;
+            }
+            
+            .time-box {
+                text-align: center;
+            }
+            
+            .content {
+                padding: 12px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .form-row .form-group {
+                margin-bottom: 0;
+                min-width: auto;
+            }
+            
+            .form-group {
+                margin-bottom: 12px;
+            }
+            
+            label {
+                font-size: 0.75rem;
+                margin-bottom: 4px;
+            }
+            
+            input, textarea, select {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .ai-btn {
+                position: static;
+                margin-top: 8px;
+                width: 100%;
+                padding: 8px;
+                font-size: 0.75rem;
+            }
+            
+            button {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .preview-box {
+                font-size: 0.75rem;
+                padding: 10px;
+            }
+            
+            .result-box {
+                padding: 12px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn-group a, .btn-group button {
+                padding: 10px;
+            }
+            
+            .info-text {
+                font-size: 0.65rem;
+            }
+            
+            .spinner {
+                width: 35px;
+                height: 35px;
+            }
+        }
+        
+        /* Для очень маленьких экранов */
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 10px 12px;
+            }
+            
+            .logo h1 {
+                font-size: 1rem;
+            }
+            
+            .badge {
+                font-size: 0.6rem;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            input, textarea, select {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            button {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+            
+            .preview-box {
+                font-size: 0.7rem;
+                padding: 8px;
+            }
+        }
+        
+        /* Для экранов с высоким разрешением */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1000px;
+            }
+            
+            body {
+                padding: 20px;
+            }
+        }
+        
+        /* Улучшение touch-целей */
+        @media (hover: none) and (pointer: coarse) {
+            button, .ai-btn, .btn-group a, .btn-group button {
+                cursor: default;
+            }
+            
+            input, textarea, select {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>📋 ALUTECH Inspector</h1>
+                <div class="badge">Мобильная версия | Times New Roman 14pt</div>
+            </div>
+            <div class="time-box">
+                <div class="date" id="currentDate">--.--.----</div>
+                <div class="time" id="currentTime">--:--:--</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="preview-box">
+                📄 Отчет формируется в PDF (шрифт Times New Roman 14pt)<br>
+                🧠 <strong>Нейросеть:</strong> Напишите кратко и нажмите "🧠 AI Расширить" - нейросеть дополнит текст по ГОСТам!<br>
+                📋 <strong>Темы:</strong> опорные колодки, монтажный шов, герметик, уплотнитель, стеклопакет, профиль, фурнитура, теплоизоляция, пароизоляция, отлив
+            </div>
+            
+            <div id="formSection">
+                <form id="reportForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ОРГАНИЗАЦИЯ-ПРОИЗВОДИТЕЛЬ</label>
+                            <input type="text" id="manufacturer" value="ООО «ПСК»">
+                        </div>
+                        <div class="form-group">
+                            <label>ОРГАНИЗАЦИЯ-ПРОВЕРЯЮЩИЙ</label>
+                            <input type="text" id="inspector" value="ООО «Алютех-Урал»">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>НАИМЕНОВАНИЕ ОБЪЕКТА</label>
+                            <input type="text" id="object_name" value="Административное здание, г. Екатеринбург">
+                        </div>
+                        <div class="form-group">
+                            <label>АДРЕС</label>
+                            <input type="text" id="address" value="г. Екатеринбург, ул. Толмачева 6">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>СОПРОВОЖДАЮЩЕЕ ЛИЦО</label>
+                            <input type="text" id="accompanying" value="Представитель заказчика">
+                        </div>
+                        <div class="form-group">
+                            <label>ДАТА ИНСПЕКЦИИ</label>
+                            <input type="text" id="inspection_date" placeholder="ДД.ММ.ГГГГ">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ШЕФ-ИНЖЕНЕР <span class="required">*</span></label>
+                            <input type="text" id="engineer" required placeholder="Введите ФИО">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ВЫЯВЛЕННЫЕ НАРУШЕНИЯ</label>
+                        <textarea id="findings" placeholder="Пример: опорные колодки установлены неправильно"></textarea>
+                        <button type="button" class="ai-btn" onclick="expandText('findings')">🧠 AI Расширить</button>
+                        <div class="info-text">Напишите кратко - нейросеть дополнит до полного описания по ГОСТ</div>
+                        <div id="findings-keywords" class="info-text" style="margin-top: 5px;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>РЕКОМЕНДАЦИИ</label>
+                        <textarea id="recommendations" placeholder="Пример: заменить опорные колодки"></textarea>
+                        <button type="button" class="ai-btn" onclick="expandText('recommendations')">🧠 AI Расширить</button>
+                        <div class="info-text">Напишите кратко - нейросеть дополнит до полных рекомендаций по ГОСТ</div>
+                        <div id="recommendations-keywords" class="info-text" style="margin-top: 5px;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ЗАКЛЮЧЕНИЕ</label>
+                        <textarea id="conclusion" placeholder="Введите заключение..."></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="generateReport()">📄 СФОРМИРОВАТЬ ОТЧЕТ (PDF)</button>
+                </form>
+            </div>
+            
+            <div id="loadingSection" class="loading">
+                <div class="spinner"></div>
+                <p>Формирование отчета...</p>
+                <p style="font-size: 0.8rem; color: #7f8c8d;">Пожалуйста, подождите</p>
+            </div>
+            
+            <div id="resultSection" class="result-box">
+                <h3>✅ Отчет успешно создан!</h3>
+                <div id="resultInfo"></div>
+                <div class="btn-group">
+                    <a href="#" id="downloadLink" target="_blank">📥 Скачать отчет (PDF)</a>
+                    <button onclick="location.reload()">📝 Создать новый отчет</button>
+                </div>
+            </div>
+            
+            <div id="errorSection" class="error-message"></div>
+            <div id="successSection" class="success-message"></div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 ALUTECH - Генератор отчетов (Адаптивная версия)</p>
+        </div>
+    </div>
+    
+    <!-- Скрытый элемент для рендеринга отчета -->
+    <div id="reportContainer" class="report-preview"></div>
+    
+    <!-- Загрузка библиотек -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // Проверка загрузки библиотек
+        let html2canvasLoaded = typeof html2canvas !== 'undefined';
+        let jspdfLoaded = typeof window.jspdf !== 'undefined';
+        
+        if (!html2canvasLoaded) {
+            console.warn('html2canvas не загрузился, загружаем заново...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            document.head.appendChild(script);
+        }
+        
+        if (!jspdfLoaded) {
+            console.warn('jspdf не загрузился, загружаем заново...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            document.head.appendChild(script);
+        }
+        
+        // ============= ВСТРОЕННАЯ НЕЙРОСЕТЬ ДЛЯ ГЕНЕРАЦИИ ТЕКСТОВ =============
+        
+        const GOST_DATABASE = {
+            "опорные колодки": {
+                "gost": "ГОСТ Р 52749-2007 п. Б 5.4",
+                "requirement": "применять опорные (несущие) колодки из полимерных материалов плотностью не менее 80 единиц по Шору А",
+                "violation": "применяются не соответствующие материалы (куски кирпичей, остатки гипсокартона)",
+                "recommendation": "заменить опорные колодки на сертифицированные из полимерных материалов"
+            },
+            "монтажный шов": {
+                "gost": "ГОСТ 30971-2012",
+                "requirement": "монтажный шов должен состоять из трех слоев: центрального теплоизоляционного, наружного гидроизоляционного и внутреннего пароизоляционного",
+                "violation": "монтажный шов выполнен с нарушениями: отсутствует один из слоев, имеются пустоты",
+                "recommendation": "выполнить монтажный шов в соответствии с требованиями, обеспечив три слоя изоляции"
+            },
+            "герметик": {
+                "gost": "ГОСТ 30971-2012 по Приложению А п. А4.4",
+                "requirement": "поверхность герметика не должна иметь трещин, раковин и пустот",
+                "violation": "нанесение выполнено с раковинами и пустотами",
+                "recommendation": "удалить некачественный герметик и нанести новый с соблюдением технологии"
+            },
+            "уплотнитель": {
+                "gost": "Системный каталог ALUTECH «Оконные конструкции W72»",
+                "requirement": "уплотнитель должен устанавливаться без разрывов",
+                "violation": "уплотнитель установлен с разрывами",
+                "recommendation": "произвести демонтаж и последующий монтаж уплотнителя"
+            },
+            "стеклопакет": {
+                "gost": "ГОСТ 24866-2014",
+                "requirement": "отклонение от плоскости стеклопакета не должно превышать 0.2% длины ребра",
+                "violation": "стеклопакет установлен с перекосами",
+                "recommendation": "заменить стеклопакет на соответствующий требованиям"
+            },
+            "профиль": {
+                "gost": "ГОСТ 30674-99",
+                "requirement": "поверхность профилей не должна иметь сколов и царапин",
+                "violation": "профиль имеет механические повреждения",
+                "recommendation": "заменить поврежденные профильные элементы"
+            },
+            "фурнитура": {
+                "gost": "ГОСТ 30777-2012",
+                "requirement": "фурнитура должна обеспечивать плавное открывание",
+                "violation": "фурнитура работает с заеданиями",
+                "recommendation": "отрегулировать или заменить неисправные элементы фурнитуры"
+            },
+            "теплоизоляция": {
+                "gost": "СП 50.13330.2012",
+                "requirement": "теплоизоляционный слой должен быть непрерывным",
+                "violation": "теплоизоляция установлена с зазорами",
+                "recommendation": "восстановить целостность теплоизоляционного слоя"
+            },
+            "пароизоляция": {
+                "gost": "СП 23-101-2004",
+                "requirement": "пароизоляционный слой должен быть непрерывным",
+                "violation": "пароизоляция имеет разрывы",
+                "recommendation": "восстановить пароизоляционный слой"
+            },
+            "отлив": {
+                "gost": "ГОСТ 30971-2012 п. 5.1.8",
+                "requirement": "отлив должен обеспечивать отвод воды",
+                "violation": "отлив установлен с обратным уклоном",
+                "recommendation": "переустановить отлив с правильным уклоном"
+            }
+        };
+        
+        function analyzeText(text) {
+            const textLower = text.toLowerCase();
+            const foundKeywords = [];
+            
+            for (const keyword in GOST_DATABASE) {
+                if (textLower.includes(keyword)) {
+                    foundKeywords.push(keyword);
+                }
+            }
+            return foundKeywords;
+        }
+        
+        function generateViolation(text) {
+            const keywords = analyzeText(text);
+            
+            if (keywords.length === 0) {
+                return text;
+            }
+            
+            const results = [];
+            for (const keyword of keywords) {
+                const data = GOST_DATABASE[keyword];
+                results.push(`${data.violation} Согласно ${data.gost} необходимо ${data.requirement}.`);
+            }
+            return results.join(' ');
+        }
+        
+        function generateRecommendation(text) {
+            const keywords = analyzeText(text);
+            
+            if (keywords.length === 0) {
+                return text;
+            }
+            
+            const results = [];
+            for (const keyword of keywords) {
+                const data = GOST_DATABASE[keyword];
+                results.push(`В соответствии с ${data.gost} рекомендуется ${data.recommendation}.`);
+            }
+            return results.join(' ');
+        }
+        
+        function expandText(type) {
+            const textarea = document.getElementById(type);
+            const shortText = textarea.value.trim();
+            
+            if (!shortText) {
+                showError('Введите текст для расширения');
+                return;
+            }
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Генерация...';
+            
+            setTimeout(() => {
+                let expandedText;
+                if (type === 'findings') {
+                    expandedText = generateViolation(shortText);
+                } else {
+                    expandedText = generateRecommendation(shortText);
+                }
+                
+                textarea.value = expandedText;
+                showSuccess('Нейросеть успешно расширила текст!');
+                
+                const keywords = analyzeText(expandedText);
+                const keywordsDiv = document.getElementById(`${type}-keywords`);
+                if (keywords.length > 0) {
+                    const keywordsHtml = keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
+                    keywordsDiv.innerHTML = `🔍 Найдены ключевые слова: ${keywordsHtml}`;
+                } else {
+                    keywordsDiv.innerHTML = `🔍 Ключевые слова не найдены.`;
+                }
+                
+                btn.disabled = false;
+                btn.textContent = '🧠 AI Расширить';
+            }, 500);
+        }
+        
+        // Время
+        function updateTime() {
+            const d = new Date();
+            document.getElementById('currentDate').innerHTML = d.toLocaleDateString('ru-RU');
+            document.getElementById('currentTime').innerHTML = d.toLocaleTimeString('ru-RU');
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Установка даты по умолчанию
+        const today = new Date();
+        const dateInput = document.getElementById('inspection_date');
+        if (dateInput && !dateInput.value) {
+            dateInput.value = today.toLocaleDateString('ru-RU');
+        }
+        
+        function showSuccess(message) {
+            const successSection = document.getElementById('successSection');
+            successSection.innerHTML = `<strong>✅ Успех:</strong> ${message}`;
+            successSection.classList.add('show');
+            
+            setTimeout(() => {
+                successSection.classList.remove('show');
+            }, 3000);
+        }
+        
+        function showError(message) {
+            const errorSection = document.getElementById('errorSection');
+            errorSection.innerHTML = `<strong>❌ Ошибка:</strong> ${message}`;
+            errorSection.classList.add('show');
+            
+            setTimeout(() => {
+                errorSection.classList.remove('show');
+            }, 5000);
+        }
+        
+        function showLoading(show) {
+            const formSection = document.getElementById('formSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultSection = document.getElementById('resultSection');
+            
+            if (show) {
+                formSection.style.display = 'none';
+                loadingSection.classList.add('show');
+                resultSection.classList.remove('show');
+            } else {
+                loadingSection.classList.remove('show');
+            }
+        }
+        
+        function buildReportHTML() {
+            const engineer = document.getElementById('engineer').value.trim();
+            const manufacturer = document.getElementById('manufacturer').value;
+            const inspector = document.getElementById('inspector').value;
+            const objectName = document.getElementById('object_name').value;
+            const address = document.getElementById('address').value;
+            const accompanying = document.getElementById('accompanying').value;
+            const findings = document.getElementById('findings').value;
+            const recommendations = document.getElementById('recommendations').value;
+            const conclusion = document.getElementById('conclusion').value;
+            const inspectionDate = document.getElementById('inspection_date').value;
+            
+            const dateForNumber = inspectionDate.replace(/\./g, '-');
+            const randomNum = Math.floor(Math.random() * 999) + 1;
+            const reportNumber = `${dateForNumber}-${randomNum.toString().padStart(3, '0')}`;
+            
+            let findingsList = findings.split('\n').filter(l => l.trim());
+            if (findingsList.length === 0) {
+                findingsList = ['Нарушения не указаны'];
+            }
+            
+            let recsList = recommendations.split('\n').filter(l => l.trim());
+            if (recsList.length === 0) {
+                recsList = ['Рекомендации не указаны'];
+            }
+            
+            const conclusionText = conclusion || 'По результатам осмотра были выявлены отклонения от требований актуальных каталогов и нормативной документации.';
+            
+            return `
+                <div style="font-family: 'Times New Roman', Times, serif; font-size: 14pt; line-height: 1.4; max-width: 800px; margin: 0 auto; padding: 40px 30px; background: white; box-sizing: border-box;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="font-size: 18pt; font-weight: bold;">ОТЧЕТ № ${reportNumber}</div>
+                        <div style="font-size: 16pt;">инспекционного осмотра объекта</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div><strong>ДАТА ИНСПЕКЦИИ:</strong> ${inspectionDate} &nbsp;&nbsp;&nbsp;&nbsp; <strong>ГОРОД/СТРАНА:</strong> Екатеринбург/РФ</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div><strong>ОРГАНИЗАЦИЯ ПРОИЗВОДИТЕЛЬ/УСТАНОВЩИК:</strong> ${manufacturer}</div>
+                        <div><strong>ОРГАНИЗАЦИЯ ПРОВЕРЯЮЩИЙ:</strong> ${inspector}</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div><strong>НАИМЕНОВАНИЕ ОБЪЕКТА УСТАНОВКИ:</strong> ${objectName}</div>
+                        <div><strong>СОПРОВОЖДАЮЩЕЕ ЛИЦО:</strong> ${accompanying}</div>
+                        <div><strong>АДРЕС:</strong> ${address}</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold;">1. ОСНОВАНИЯ ПРОВЕДЕНИЯ ИНСПЕКЦИОННОГО ОСМОТРА:</div>
+                        <div style="margin-top: 5px;">Обращение компании ${manufacturer} для проведения аудита монтируемых конструкций на объекте ${objectName}, ${address}</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold;">РЕЗУЛЬТАТЫ ИНСПЕКЦИОННОГО ОСМОТРА:</div>
+                        <div style="margin-top: 5px;"><strong>Выявлено:</strong></div>
+                        <div style="margin-left: 20px; margin-top: 5px;">
+                            ${findingsList.map((f, i) => `<div style="margin-bottom: 5px;">${i+1}. ${f}</div>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold;">2. РЕКОМЕНДАЦИИ:</div>
+                        <div style="margin-left: 20px; margin-top: 5px;">
+                            ${recsList.map((r, i) => `<div style="margin-bottom: 5px;">${i+1}. ${r}</div>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <div style="font-weight: bold;">3. ЗАКЛЮЧЕНИЕ:</div>
+                        <div style="margin-top: 5px;">${conclusionText}</div>
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <div>Шеф инженер ${engineer}</div>
+                        <div>${inspector}</div>
+                        <div>ДАТА ${inspectionDate}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function generateReport() {
+            const engineer = document.getElementById('engineer').value.trim();
+            
+            if (!engineer) {
+                showError('Введите ФИО шеф-инженера');
+                return;
+            }
+            
+            // Проверяем загрузку библиотек
+            if (typeof html2canvas === 'undefined') {
+                showError('Библиотека html2canvas не загружена. Обновите страницу и попробуйте снова.');
+                return;
+            }
+            
+            if (typeof window.jspdf === 'undefined') {
+                showError('Библиотека jsPDF не загружена. Обновите страницу и попробуйте снова.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const reportHTML = buildReportHTML();
+                const reportContainer = document.getElementById('reportContainer');
+                reportContainer.innerHTML = reportHTML;
+                
+                const element = document.getElementById('reportContainer');
+                const { jsPDF } = window.jspdf;
+                
+                // Получаем размеры элемента
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190;
+                const pageHeight = 277;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                const doc = new jsPDF({
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                });
+                
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                const fileName = `report_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}-${Math.floor(Math.random() * 999) + 1}.pdf`;
+                doc.save(fileName);
+                
+                showLoading(false);
+                document.getElementById('resultInfo').innerHTML = `
+                    <p><strong>Отчет успешно создан!</strong></p>
+                    <p><strong>Дата:</strong> ${document.getElementById('inspection_date').value}</p>
+                    <p><strong>Формат:</strong> PDF</p>
+                    <p><strong>Шрифт:</strong> Times New Roman, размер 14pt</p>
+                `;
+                document.getElementById('resultSection').classList.add('show');
+                showSuccess('Отчет успешно создан и скачан!');
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showLoading(false);
+                showError('Ошибка при создании отчета: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
